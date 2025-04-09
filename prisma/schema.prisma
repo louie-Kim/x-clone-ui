@@ -1,0 +1,143 @@
+// npm install prisma
+// npx prisma init 하면 생기는 파일
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  // docker의 mysql 컨테이너에 연결
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id          String   @id
+  email       String   @unique
+  username    String   @unique
+  displayName String?
+  bio         String?
+  location    String?
+  job         String?
+  website     String?
+  img         String?
+  cover       String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // RELATIONS - FK
+  posts Post[]
+
+  likes Like[]
+
+  saves SavedPosts[]
+
+  /**
+  Follow
+  "  " 이름으로 관계 설정
+  follower  User @relation("UserFollowers", fields: [followerId], references: [id])
+  following User @relation("UserFollowings", fields: [followingId], references: [id])
+  */
+  followers  Follow[] @relation("UserFollowers")
+  followings Follow[] @relation("UserFollowings")
+}
+
+model Post {
+  // @id : 해당 필드가 데이터베이스의 기본 키(Primary Key) 임을 지정
+  id          Int      @id @default(autoincrement())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  desc        String?  @db.VarChar(255)
+  img         String?
+  imgHeight   Int?
+  video       String?
+  isSensitive Boolean  @default(false)
+
+  // RELATIONS
+  // fields: [userId]: Post 모델에서 관계를 정의하는 필드가 userId
+  // references: [id]: User 모델의 id 필드를 참조
+  // userId 필드가 User 모델의 id와 연결
+  user   User   @relation(fields: [userId], references: [id])
+
+  // 외래키 User 모델의 id 필드를 참조
+  // 게시물을 작성한 사람 ID
+  userId String
+
+
+  //  게시물의 id가 저장되는 필드 - FK
+  rePostId Int?
+  // 관계 필드 - 실제 데이터베이스에 값이 저장 X
+  rePost   Post?  @relation("RePosts", fields: [rePostId], references: [id])
+  // rePostId 값이 동일한 모든 게시물들이 이 배열에 포함
+  rePosts  Post[] @relation("RePosts")
+
+  // 댓글이 달리는 게시물의 ID
+  // null:  최초게시물 -> parentPostId 1 : 
+  /**
+  Post 1: "오늘 점심 뭐 먹지?"
+    ├── Post 2: "김치찌개 추천!" (댓글)  parentPostId = 1
+    │   └── Post 4: "김치찌개 짱이죠 ㅋㅋ" (대댓글) parentPostId = 2
+    └── Post 3: "난 비빔밥!" (댓글)  parentPostId = 1
+
+  */
+  parentPostId Int?
+  parentPost   Post?  @relation("PostComments", fields: [parentPostId], references: [id])
+  // 나에게 달린 모든 댓글들(Post[])
+  comments     Post[] @relation("PostComments")
+
+  likes Like[]
+
+  saves SavedPosts[]
+}
+
+model Like {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+
+  // RELATIONS - FK
+  userId String
+  postId Int
+
+  // User, Post 모델과의 관계 설정
+  user User @relation(fields: [userId], references: [id])
+  post Post @relation(fields: [postId], references: [id])
+}
+
+model SavedPosts {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+
+  // RELATIONS- FK
+  userId String
+  postId Int
+
+  
+  user User @relation(fields: [userId], references: [id])
+  post Post @relation(fields: [postId], references: [id])
+}
+
+model Follow {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+
+  // RELATIONS- FK
+  followerId  String  // 팔로우하는 사람의 User 모델의 id
+  followingId String  // 팔로우 당하는 사람의 User 모델의 id
+
+  // 모델 간의 관계를 정의하는 필드
+  follower  User @relation("UserFollowers", fields: [followerId], references: [id])
+  following User @relation("UserFollowings", fields: [followingId], references: [id])
+}
+
+
+// prisma extention 설치를 해야 여기 코드 활성화됨
+
+// To map your data model to the database schema, you need to use the prisma migrate CLI commands:
+
+// npx prisma migrate dev --name init   => migration.sql 파일 생성
+
+// npx prisma migrate dev --name delet_user_name => migration.sql 파일 ( user테이블 name 삭제) 
+
+
+// npx prisma studio  : 링크 열리고 -> prisma 데이터베이스에 접근할 수 있는 웹 UI가 열림
+
+// npm install @prisma/client : DB테이블에  CRUD 가능하게 해주는 라이브러리
