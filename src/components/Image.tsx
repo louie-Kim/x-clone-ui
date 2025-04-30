@@ -4,7 +4,8 @@ import { IKImage } from "imagekitio-next";
 
 // :? 
 type ImageType = {
-    path: string; // 필수 속성
+    path?: string; // from imagekit
+    src?: string; //  from another domain : google
     w?: number;   // 선택 속성
     h?: number;
     alt: string;
@@ -16,7 +17,7 @@ const urlEndpoint = process.env.NEXT_PUBLIC_URL_ENDPOINT;
 
 
 
-const Image = ({ path, w, h, alt, className, tr }:ImageType ) => {
+const Image = ({ path, src, w, h, alt, className, tr }:ImageType ) => {
 
   // console.log("tr", tr);
   // console.log(" w, h",  w, h); 
@@ -30,6 +31,7 @@ const Image = ({ path, w, h, alt, className, tr }:ImageType ) => {
     // https://ik.imagekit.io/jykim + New%20Folder/이미지.svg
     urlEndpoint={urlEndpoint} 
     path={path} 
+    src={src}
     // width={w} 
     // height={h}
     // transformation={[{ width: `${w}`, height: `${h}` }]}

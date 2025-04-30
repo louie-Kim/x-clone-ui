@@ -5,35 +5,66 @@ import PostInfo from "./PostInfo";
 import PostInteraction from "./PostInteraction";
 import Video from "./Video";
 import Link from "next/link";
-// post 테이블
 import { Post as PostType } from "@prisma/client";
 import { format } from "timeago.js";
 
 
-type PostWithDetails = PostType & {
-  user: {
-    displayName: string | null ;
-    username: string;
-    img: string | null;
-  };
+
+// User 요약정보 타입
+type UserSummary = {
+  displayName: string | null;
+  username: string;
+  img: string | null;
 };
 
-// 남들이 올린 포스팅??
+// 게시물 참여정보 타입 (좋아요, 리포스트, 댓글 수 등)
+type PostEngagement = {
+  _count: {
+    likes: number;
+    rePosts: number;
+    comments: number;
+  };
+  likes: { id: number }[];
+  rePosts: { id: number }[];
+  saves: { id: number }[];
+};
+
+// 리포스트된 원본 게시물 타입
+type RePostDetails = PostType & PostEngagement & {
+  user: UserSummary;
+};
+
+// 최종 게시물 타입 (Post + 유저정보 + 리포스트 정보)
+type PostWithDetails = PostType & PostEngagement & {
+  user: UserSummary;
+  rePost?: RePostDetails | null;
+};
+
+
+
+
+
 // 서버사이드 컴포넌트
 const Post = ({
   type,
   post,
 }: {
-  type?: "status" | "comments";
+  type?: "status" | "comment";
   post: PostWithDetails;
 }) => {
- 
+  // console.log("Post component type", type); // status, comments
 
-  console.log("포스팅 정보", post); // 여기서 post.desc로 포스팅 내용 가져옴
+  const originalPost = post.rePost || post;
+  // console.log("post", post);
+  // console.log("post.rePost", post.rePost); // originalPost
+  // console.log("post._count", originalPost._count);
+
+  // console.log(originalPost.likes.length);
 
   return (
     <div className="p-4 border-y-[1px] border-borderGray">
       {/* Post type */}
+      {/* post.rePostId 가 없으면 -> 리포스트한 게시물이 없다는 뜻  */}
       {post.rePostId && (
         <div className="flex items-center gap-2 text-sm text-textGray mb-2 from-bold">
           <svg
@@ -51,18 +82,17 @@ const Post = ({
         </div>
       )}
 
-      {/* Post content */}
-      {/* <div className="flex gap-4"> */}
+      {/* section 0 */}
       <div className={`flex gap-4 ${type === "status" && "flex-col"}`}>
-        {/* Avatar */}
-
+        {/* Section 1 */}
         <div
           className={`${
             type === "status" && "hidden"
-          } relative w-10 h-10 rounded-full overflow-hidden`}
+          } relative w-10 h-10 rounded-full overflow-hidden -z-10`}
         >
+          {/* 링크 없는 이미지 */}
           <Image
-            path={post.user.img || "New%20Folder/noAvatar.png"}
+            path={originalPost.user.img || "New%20Folder/noAvatar.png"}
             alt=""
             w={100}
             h={100}
@@ -70,33 +100,39 @@ const Post = ({
           />
         </div>
 
-        {/* content */}
-        {/* flex-1 : 공간 전부 차지*/}
+        {/* Section 2*/}
         <div className="flex-1 flex flex-col gap-2">
-          {/* top */}
+          {/* Section 2-1 */}
           <div className="w-full flex justify-between">
-            <Link href={`/lamadev`} className="flex gap-4">
+            {/* 특정 유저의 페이지로 이동  */}
+            <Link
+              href={`/${originalPost.user.username}`}
+              className="flex gap-4"
+            >
+              {/* type = comment 여기 이미지 안보임*/}
               <div
                 className={`${
                   type !== "status" && "hidden"
                 } relative w-10 h-10 rounded-full overflow-hidden`}
               >
+                {/* 링크 이미지 */}
                 <Image
-                  path={post.user.img || "New%20Folder/noAvatar.png"}
+                  path={originalPost.user.img || "New%20Folder/noAvatar.png"}
                   alt=""
                   w={100}
                   h={100}
                   tr={true}
                 />
               </div>
-
+              {/* DisplayName, Username, Timestamp */}
               <div
-                // !items-start : X축 방향(가로 방향) 으로 '! 강제 ' 정렬
                 className={`flex items-center gap-2 flex-wrap ${
                   type === "status" && "flex-col gap-0 !items-start"
                 }`}
               >
-                <h1 className="text-md font-bold">{post.user.displayName}</h1>
+                <h1 className="text-md font-bold">
+                  {originalPost.user.displayName}
+                </h1>
                 {/* <span>은 기본적으로 display: inline; 속성을 가지므로, 브라우저가 자동으로 한 줄에 배치 */}
                 <span
                   className={`text-textGray ${type === "status" && "text-sm"}`}
@@ -105,7 +141,7 @@ const Post = ({
                 </span>
                 {type !== "status" && (
                   <span className="text-textGray">
-                    {format(post.createdAt)}
+                    {format(originalPost.createdAt)}
                   </span>
                 )}
               </div>
@@ -115,32 +151,34 @@ const Post = ({
           </div>
 
           {/* text & media */}
-          <Link href={`/xxxDev/status/123`}>
-            <p className={`${type === "status" && "text-lg"}`}>{post.desc}</p>
+          {/* Section 2-2 */}
+          <Link
+            href={`/${originalPost.user.username}/status/${originalPost.id}`}
+          >
+            <p className={`${type === "status" && "text-lg"}`}>
+              {originalPost.desc}
+            </p>
           </Link>
-          {post.img && <Image path={post.img} alt="" w={600} h={600} />}
-
-          {/* { fileDetails && fileDetails.fileType === "image" ?
-                (
-                  <Image
-                  path={fileDetails.filePath}
-                  alt=""
-                  w={fileDetails.width}
-                  h={fileDetails.height}
-                  className={fileDetails.customMetadata?.sensitive ? "blur-lg" : ""}
-                  />
-                  ) : (
-                    
-                  <Video 
-                  path={fileDetails.filePath} 
-                  className={fileDetails.customMetadata?.sensitive ? "blur-lg" : ""} 
-                  />
-                  )} */}
-
+          {originalPost.img && (
+            <Image
+              path={originalPost.img}
+              alt=""
+              w={600}
+              h={originalPost.imgHeight || 600}
+            />
+          )}
           {type === "status" && (
             <span className="text-textGray">8:41 PM Dec 5, 2025</span>
           )}
-          <PostInteraction />
+
+          <PostInteraction
+            username={originalPost.user.username}
+            postId={originalPost.id}
+            count={originalPost._count}
+            isLiked={!!originalPost.likes.length}
+            isRePosted={!!originalPost.rePosts.length}
+            isSaved={!!originalPost.saves.length}
+          />
         </div>
       </div>
     </div>

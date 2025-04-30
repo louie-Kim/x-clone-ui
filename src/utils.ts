@@ -1,7 +1,7 @@
 import ImageKit from "imagekit"
 
 
-console.log("🔍🔍🔍🔍PRIVATE_KEY:", process.env.PRIVATE_KEY); // 🔍 확인용 로그
+// console.log("🔍🔍🔍🔍PRIVATE_KEY:", process.env.PRIVATE_KEY); // 🔍 확인용 로그
 
 
 export const imagekit = new ImageKit({

@@ -3,6 +3,9 @@
 import Link from "next/link";
 import Image from "./Image";
 import { useRouter } from "next/navigation";
+import Socket from "./Socket";
+import Notification from "./Notification";
+import { Fragment } from "react";
 
 const menuList = [
   {
@@ -17,12 +20,13 @@ const menuList = [
     link: "/",
     icon: "explore.svg",
   },
-  {
-    id: 3,
-    name: "Notification",
-    link: "/",
-    icon: "notification.svg",
-  },
+  // 알림
+  // {
+  //   id: 3,
+  //   name: "Notification",
+  //   link: "/",
+  //   icon: "notification.svg",
+  // },
   {
     id: 4,
     name: "Messages",
@@ -68,13 +72,11 @@ const menuList = [
 ];
 
 const LeftBar = () => {
+  const router = useRouter();
 
-    const router = useRouter();
-
-    const openPostModal = () => {
-      router.push("/compose/post");  // URL을 변경하여 모달 표시
-    };
-
+  const openPostModal = () => {
+    router.push("/compose/post"); // URL을 변경하여 모달 표시
+  };
 
   return (
     // sticky가 적용된 이 요소(LeftBar)가 뷰포트의 최상단(top: 0)에 붙어 있도록
@@ -90,29 +92,35 @@ const LeftBar = () => {
 
         {/* menu list */}
         <div className="flex flex-col gap-4">
-          {menuList.map((item) => (
-            <Link
-              href={item.link}
-              className="p-2 rounded-full hover:bg-[#181818] flex items-center gap-4"
-              key={item.id}
-            >
-              <Image
-                path={`New%20Folder/${item.icon}`}
-                alt={item.name}
-                w={24}
-                h={24}
-              />
-              {/* span 은 원래 인라인 엘리먼트 */}
-              <span className="hidden xxl:inline">{item.name}</span>
-            </Link>
+          {menuList.map((item, i) => (
+            <div key={item.id || i}>
+              {/* 인덱스 2  Messages 앞에 추가로 끼워넣어서 Notification 렌더링*/}
+              {i === 2 && (
+                <div>
+                  <Notification />
+                </div>
+              )}
+              <Link
+                href={item.link}
+                className="p-2 rounded-full hover:bg-[#181818] flex items-center gap-4"
+              >
+                <Image
+                  path={`New%20Folder/${item.icon}`}
+                  alt={item.name}
+                  w={24}
+                  h={24}
+                />
+                {/* span 은 원래 인라인 엘리먼트 */}
+                <span className="hidden xxl:inline">{item.name}</span>
+              </Link>
+            </div>
           ))}
         </div>
-        {/* button */}
         {/* 모바일 버튼 */}
         {/* /test/status/123 여기 갔다가 오면 모달창 열림 왜???*/}
         <Link
           href="/compose/post"
-          // onClick={openPostModal}  
+          // onClick={openPostModal}
           className="bg-white text-black rounded-full w-12 h-12 flex items-center justify-center xxl:hidden"
         >
           <Image path="New%20Folder/post.svg" alt="new post" w={24} h={24} />
@@ -126,6 +134,7 @@ const LeftBar = () => {
           Post
         </Link>
       </div>
+      <Socket />
       {/* user */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
@@ -153,9 +162,6 @@ const LeftBar = () => {
 
 export default LeftBar;
 
-
-
-
 // import Link from "next/link";
 // import Image from "./Image";
 // import { useRouter } from "next/navigation";
@@ -179,7 +185,7 @@ export default LeftBar;
 //   // 모달을 여는 함수 (Next.js App Router 사용)
 //   const openPostModal = () => {
 //     console.log("🔍 Trying to open modal at: /compose/post");  // 로그 추가
-    
+
 //     router.push("/compose/post");  // 경로 수정
 //     console.log("🔍 모달 오픈 성공~!!!!");  // 로그 추가
 //   };

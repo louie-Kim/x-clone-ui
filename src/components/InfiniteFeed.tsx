@@ -51,10 +51,10 @@ const InfiniteFeed = ({ userProfileId }: { userProfileId?: string }) => {
       */
       getNextPageParam: (lastPage, allPages) => {
         // 첫 로딩시에도 getNextPageParam이 실행됨
-        console.log(" 🎯 getNextPageParam 실행");
-        console.log("lastPage", lastPage); 
-        console.log("allPages",allPages);
-        console.log("allPages.length", allPages.length); 
+        // console.log(" 🎯 getNextPageParam 실행");
+        // console.log("lastPage", lastPage); 
+        // console.log("allPages",allPages);
+        // console.log("allPages.length", allPages.length); 
         
         const nextPage = lastPage.hasMore ? allPages.length + 2 : undefined;
         return nextPage;
@@ -120,26 +120,13 @@ const InfiniteFeed = ({ userProfileId }: { userProfileId?: string }) => {
 
 
   return (
-    /**
-     * 스크롤 바닥 도달 (조건 1)
-        ↓
-      hasMore === true (조건 2)
-        ↓
-      fetchNextPage() 실행됨
-        ↓
-      데이터 새로 받아옴
-        ↓
-      dataLength 증가
-        ↓
-      다음 요청 가능 상태로 유지됨
-
-     */
+  
     <InfiniteScroll
       //  dataLength 값이 바뀌면 다음 스크롤 이벤트를 기다림
       dataLength={allPosts.length} 
       // next={fetchNextPage}
       next={() => {
-        console.log(" 🚀  fetchNextPage 호출");
+        // console.log(" 🚀  fetchNextPage 호출");
         fetchNextPage();
       }}
       hasMore={!!hasNextPage}  //  Boolean값으로 확실하게 바꿔주는 역할

@@ -59,17 +59,39 @@ const Feed = async ({ userProfileId }: { userProfileId?: string }) => {
     }
    *  */
   // console.log("whereCondition-------------------", whereCondition);
-  
+
   // 최신순 3개의 게시물을 먼저 가져옴
+
+  const postIncludeQuery = {
+    user: { select: { displayName: true, username: true, img: true } },
+    //  Post 모델 안에서 배열([])로 정의된 필드들의 항목 수
+    _count: {
+      select: { likes: true, rePosts: true, comments: true },
+    },
+    // userId 가 누른 id 필드만 가져옴
+    likes: { where: { userId: userId }, select: { id: true } },
+    rePosts: { where: { userId: userId }, select: { id: true } },
+    saves: { where: { userId: userId }, select: { id: true } },
+  };
+
   const posts = await prisma.post.findMany({
     where: whereCondition,
-    include:{user:{ select:{ displayName:true, username:true, img:true }}},
+
+    include: {
+      //  리포스트한 사람
+      // 원본 게시물의 작성자의 정보
+      rePost: {
+        include: postIncludeQuery,
+      },
+      ...postIncludeQuery
+    },
+
     take: 3,
     skip: 0,
-    orderBy: { createdAt: "desc" }, // 최신순으로 정렬
+    orderBy: { createdAt: "desc" },
   });
 
-  // console.log("posts", posts);
+  console.log("Feed component posts", posts);
 
   // Fectch posts from the current user and followings
 
@@ -77,7 +99,7 @@ const Feed = async ({ userProfileId }: { userProfileId?: string }) => {
     <div className="">
       {posts.map((post) => (
         <div key={post.id}>
-          <Post post={post}/>
+          <Post post={post} />
           From server : first 3 posts
         </div>
       ))}

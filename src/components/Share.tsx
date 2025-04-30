@@ -1,11 +1,12 @@
 "use client";
-// useState 를 사용하는 컴포넌트(클라이언트)는 use client 를 명시해야함 
+// useState 를 사용하는 컴포넌트(클라이언트)는 use client 를 명시해야함
 
-import { useState } from "react";
+import { useActionState, useEffect, useRef, useState } from "react";
 import Image from "./Image";
 import NextImage from "next/image";
-import { shareAction } from "@/actions";
 import ImageEditor from "./ImageEditor";
+import { useUser } from "@clerk/nextjs";
+import { addPost } from "@/action";
 
 const Share = () => {
   // transformation -> 이미지 컴포넌트 프롭스fill={true} 자동 설정 -> 부모태그가 relative, absolute, fixed 중 하나여야 함
@@ -50,28 +51,55 @@ const Share = () => {
   const previewUrl = media ? URL.createObjectURL(media) : null;
   // console.log("previewUrl of image video", previewUrl); //<input type="file" />에서 선택한 파일(media)의 임시 URL(blob URL) blob:http://localhost:3000/...
 
+  const { user } = useUser();
+
+  // useActionState : 서버 액션을 처리하고 상태를 관리하는 훅
+  /**
+   * <form action={formAction}> -> FormData로 만들어서 formAction호출
+   * addPost(FormData)  서버액션 실행 후 ->  state 업데이트 -> state.error 사용
+   */
+  const [state, formAction, isPending] = useActionState(addPost, {
+    // state
+    success: false,
+    error: false,
+  });
+
+  const formRef = useRef<HTMLFormElement | null>(null);
+
+  // 업로드 후 창닫기
+  useEffect(() => {
+    if (state.success) formRef.current?.reset();
+  }, [state]);
+
   return (
     <form
+      ref={formRef}
       className="p-4 flex gap-4"
-      action={(formData) => shareAction(formData, settings)}
+      // action={(formData) => shareAction(formData, settings)}
+      action={formAction}
     >
       {/* avatar */}
       <div className="relative h-10 w-10 rounded-full overflow-hidden">
-        <Image
-          path="New%20Folder/avatar.png"
-          alt=""
-          w={100}
-          h={100}
-          tr={true}
-        />
+        <Image src={user?.imageUrl} alt="" w={100} h={100} tr={true} />
       </div>
 
-      {/*  */}
-
-      {/* others */}
       {/* 부모 기본 세로정렬을 시켜도 flex flex-col 자식내부에서는 따로 flex~ 헤서 가로, 세로 정렬 가능!!  <div className="flex items-center gap-4 flex-wrap">
           여기 값을 items-start items-end 로 테스트 해보면 됨*/}
       <div className="flex-1 flex flex-col gap-4">
+        <input
+          type="text"
+          name="imgType"
+          value={settings.type}
+          hidden
+          readOnly
+        />
+        <input
+          type="text"
+          name="isSensitive"
+          value={settings.sensitive ? "true" : "false"}
+          hidden
+          readOnly
+        />
         <input
           type="text"
           name="desc"
@@ -190,9 +218,15 @@ const Share = () => {
             />
           </div>
           {/* 이 버튼이 클릭되면 <form> 요소의 action으로 지정된 함수 shareAction이 실행 */}
-          <button className="bg-white text-black font-bold rounded-full py-2 px-4">
-            Post
+          <button
+            className="bg-white text-black font-bold rounded-full py-2 px-4 disabled:cursor-not-allowed"
+            disabled={isPending}
+          >
+            {isPending ? "Posting..." : "Post"}
           </button>
+          {state.error && (
+            <span className="text-red-300 p-4">Some thind went wrong</span>
+          )}
         </div>
       </div>
     </form>
