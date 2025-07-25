@@ -39,7 +39,7 @@ const SignUppage = () => {
         {/* social login */}
         {/* SignIn.Root :  로그인 관련 UI(예: 소셜 로그인 버튼들 등)를 감싸주는 컨테이너 컴포넌트 */}
         <SignUp.Root>
-          {/* step 1 */}
+          {/* step 1 --------------------------------------------------------------------------*/}
           <SignUp.Step name="start" className="flex flex-col gap-4">
             <Clerk.Connection
               name="google"
@@ -75,7 +75,7 @@ const SignUppage = () => {
               </svg>
               Sign up with Apple
             </Clerk.Connection>
-            {/* sign up 입력필드 */}
+            {/* sign up 입력필드 -----------*/}
             <div className="flex flex-col gap-4">
               Sign up with credentials
               <Clerk.Field name="username" className="flex flex-col gap-2">
@@ -111,7 +111,9 @@ const SignUppage = () => {
             </div>
           </SignUp.Step>
 
-          {/* 구글 로그인후 http://localhost:3000/sign-up/continue 경로 생김 -> username 입력 */}
+
+          {/* 구글 버튼으로 가입하기*/}
+          {/* 구글 버튼 클릭 후 http://localhost:3000/sign-up/continue 경로 생김 -> username 입력 */}
           <SignUp.Step name="continue" className="flex flex-col gap-4">
             <Clerk.Field name="username">
               <Clerk.Input
@@ -129,7 +131,7 @@ const SignUppage = () => {
             </SignUp.Action>
           </SignUp.Step>
 
-          {/* step-1: SignUp.Step name="start"  -> step 2: SignUp.Step name="verifications" */}
+          {/* step-1: SignUp.Step name="start" ->  인증 코드 전송  -> step 2: SignUp.Step name="verifications" -> 홈페이지 입장*/}
           <SignUp.Step name="verifications">
             <SignUp.Strategy name="email_code">
               <h1 className="text-sm mb-2">Check your e-mail</h1>

@@ -35,7 +35,8 @@ export const shareAction = async(
 
     /**
      * Blob 이진 대용량 객체  Binary Large Object
-     * file은 File 객체인데, File은 Blob을 상속받은 타입(Blob 기반: 주로 이미지, 동영상, 오디오, 문서 파일처럼 용량이 큰 이진 데이터를 저장할 때 사용) 
+     * file은 File 객체인데, File은 Blob을 상속받은 타입
+     * (Blob 기반: 주로 이미지, 동영상, 오디오, 문서 파일처럼 용량이 큰 이진 데이터를 저장할 때 사용) 
      * 
      * file.arrayBuffer()
        File 데이터를 '메모리에서 다룰 수 있는' 

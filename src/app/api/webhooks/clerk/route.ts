@@ -1,3 +1,4 @@
+// lama dev 강의 버전
 // import { Webhook } from "svix";
 // import { headers } from "next/headers";
 // import { WebhookEvent } from "@clerk/nextjs/server";
@@ -89,17 +90,75 @@
 //   return new Response("Webhook received", { status: 200 });
 // }
 
-
+// 7.24  최신 버전
 // User 생성후 Db에 저장하기
-import { prisma } from "@/prisma";
-import { verifyWebhook } from "@clerk/nextjs/webhooks";
+// import { prisma } from "@/prisma";
+// import { verifyWebhook } from "@clerk/nextjs/webhooks";
 
-export async function POST(req: Request) {
+// export async function POST(req: Request) {
+//   try {
+//     // console.log(req);
+//     //  Clerk에서 Webhook으로 받은 이 JSON 객체 파싱
+//     const evt = await verifyWebhook(req);
+//     console.log("evt", evt); // data
+
+//     // Do something with payload
+//     // For this guide, log payload to console
+//     const { id } = evt.data;
+//     const eventType = evt.type;
+//     console.log(
+//       `Received webhook with ID ${id} and event type of ${eventType}`
+//     );
+//     // console.log("Webhook payload:", evt.data);
+
+//     // evt.data.id 가 일치하는 한사람이 없기 때문에
+//     // user.created 후 user.deleted  테스트 안됨
+//     // user create
+//     if (eventType === "user.created") {
+//       // evt.data.username : 이 null , undefined 일때 -> ""
+//       const username = evt.data.username ?? "";
+//       const email = evt.data.email_addresses?.[0]?.email_address ?? "";
+//       try {
+//         await prisma.user.create({
+//           data: {
+//             id: evt.data.id, // user_29w83sxmDNGwOuEthce5gg56FcC
+//             username,
+//             email,
+//           },
+//         });
+//         console.log("유저생성-------------------:", evt.data.id);
+
+//         return new Response("User created", { status: 200 });
+//       } catch (error) {
+//         return new Response("Error: Failed to create a user!", { status: 500 });
+//       }
+//     }
+//     // delete user
+//     if (eventType === "user.deleted") {
+//       try {
+//         await prisma.user.delete({ where: { id: evt.data.id } }); // user_29wBMCtzATuFJut8jO2VNTVekS4
+//         console.log("유저삭제-------------------:", evt.data.id);
+//         return new Response("User deleted", { status: 200 });
+//       } catch (error) {
+//         return new Response("Error: Failed to create a user!", { status: 500 });
+//       }
+//     }
+
+//     return new Response("Webhook received", { status: 200 });
+//   } catch (err) {
+//     console.error("Error verifying webhook:", err);
+//     return new Response("Error verifying webhook", { status: 400 });
+//   }
+// }
+
+// 7.24 최신 버전
+import { verifyWebhook } from "@clerk/nextjs/webhooks";
+import { NextRequest } from "next/server";
+import { prisma } from "@/prisma";
+
+export async function POST(req: NextRequest) {
   try {
-    // console.log(req);
-    //  Clerk에서 Webhook으로 받은 이 JSON 객체 파싱
     const evt = await verifyWebhook(req);
-    console.log("evt", evt); // data
 
     // Do something with payload
     // For this guide, log payload to console
@@ -108,12 +167,9 @@ export async function POST(req: Request) {
     console.log(
       `Received webhook with ID ${id} and event type of ${eventType}`
     );
-    // console.log("Webhook payload:", evt.data);
+    console.log("Webhook payload:", evt.data);
 
-
-    // evt.data.id 가 일치하는 한사람이 없기 때문에 
-    // user.created 후 user.deleted  테스트 안됨
-    // user created
+    // user create
     if (eventType === "user.created") {
       // evt.data.username : 이 null , undefined 일때 -> ""
       const username = evt.data.username ?? "";
@@ -127,13 +183,13 @@ export async function POST(req: Request) {
           },
         });
         console.log("유저생성-------------------:", evt.data.id);
-        
+
         return new Response("User created", { status: 200 });
       } catch (error) {
         return new Response("Error: Failed to create a user!", { status: 500 });
       }
     }
-    // delete user 
+    // delete user
     if (eventType === "user.deleted") {
       try {
         await prisma.user.delete({ where: { id: evt.data.id } }); // user_29wBMCtzATuFJut8jO2VNTVekS4

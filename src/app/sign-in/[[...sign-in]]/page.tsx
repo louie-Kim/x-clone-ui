@@ -107,7 +107,7 @@ const SignInpage = () => {
               </Clerk.Field>
               <div className="flex flex-col gap-2">
                 {/* 테스트 계정 lama@test.com(이메일,비번)*/}
-                {/* Clerk가 이 이메일 + 비밀번호 조합을 서버에 전달해서 비밀번호 검사-> 로그인*/}
+                {/* Clerk가 이 이메일 + 비밀번호 조합을 사서버에 전달해서 비밀번호 검-> 로그인*/}
                 <SignIn.Action
                   submit
                   className="mt-2 text-sm underline w-72 text-center text-iconBlue"
@@ -126,8 +126,9 @@ const SignInpage = () => {
 
             {/* 2-2 : 이메일로 인증코드 발송 --------------------------------------------------*/}
             <SignIn.Strategy name="reset_password_email_code">
+              <div className=""></div>
               <p className="text-sm mb-2">
-                We sent a code to <SignIn.SafeIdentifier />.
+                We sent a code to <SignIn.SafeIdentifier />
               </p>
               {/* 인증코드 입력 필드 */}
               <Clerk.Field name="code" className="flex flex-col gap-2">
@@ -165,30 +166,31 @@ const SignInpage = () => {
 
           {/* 4. 비밀번호 재설정 (Reset Password Flow) -----------------------------------------*/}
           {/* 비밀번호 재설정 이메일로 인증코드 발송 후 -> 비밀번호 재설정 페이지로 이동 */}
-          <SignIn.Step name="reset-password">
-            <h1>Reset your password</h1>
+          <SignIn.Step name="reset-password" >
+            <h1 className="text-lg font-semibold mb-2">Reset your password</h1>
 
-            <Clerk.Field name="password">
-              <Clerk.Label>New password</Clerk.Label>
-              <Clerk.Input />
-              <Clerk.FieldError />
+            <Clerk.Field name="password" className="flex flex-col gap-2 mt-2">
+              <Clerk.Label className="">New password</Clerk.Label>
+              <Clerk.Input className="py-2 px-6 rounded-full text-black w-72 placeholder:text-sm"/>
+              <Clerk.FieldError className="text-red-300 text-sm"/>
             </Clerk.Field>
 
-            <Clerk.Field name="confirmPassword">
+            <Clerk.Field name="confirmPassword" className="flex flex-col gap-2 mt-2">
               <Clerk.Label>Confirm password</Clerk.Label>
-              <Clerk.Input />
-              <Clerk.FieldError />
+              <Clerk.Input className="py-2 px-6 rounded-full text-black w-72 placeholder:text-sm"/>
+              <Clerk.FieldError className="text-red-300 text-sm"/>
             </Clerk.Field>
 
-            <SignIn.Action submit>Reset password</SignIn.Action>
+            <SignIn.Action submit className="mt-2 text-sm underline w-72 text-center text-iconBlue">Reset password</SignIn.Action>
           </SignIn.Step>
 
           {/* OR SIGN UP */}
           {/* flex-grow : 부모(.flex)가 가진 남는 공간을 자식들이 차지하게 만드는 속성 */}
           <div className="w-72 flex items-center gap-4">
-            <div className="h-px bg-borderGray flex-grow"></div>
+            {/* h-px : 얇은 디바이더 역할 */}
+            <div className="h-[1px] flex-grow bg-slate-700"></div>
             <span className="text-textGrayLight">or</span>
-            <div className="h-px bg-borderGray flex-grow"></div>
+            <div className="h-[1px] bg-borderGray flex-grow"></div>
           </div>
           <Link
             href="/sign-up"

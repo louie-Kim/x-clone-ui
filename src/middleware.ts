@@ -26,8 +26,9 @@ export default clerkMiddleware(
     if (isProtectedRoute(req)) await auth.protect(); 
   },
   {
-    signInUrl: "/sign-in",
-    signUpUrl: "/sign-up",
+    // auth.protect() -> 인증되지 않은 사용자를 /sign-in으로 리다이렉트
+    signInUrl: "/sign-in",  
+    signUpUrl: "/sign-up",  // 회원가입 처리 시 이쪽 사용 
   }
 );
 
@@ -40,3 +41,24 @@ export const config = {
     '/(api|trpc)(.*)',
   ],
 };
+
+
+// from doc
+// const isPublicRoute = createRouteMatcher(['/sign-in(.*)'])
+
+// 비공개 확장 가능
+// const isPublicRoute = createRouteMatcher([
+//   '/sign-in(.*)',
+//   '/sign-up(.*)',
+//   '/',
+// ])
+
+// export default clerkMiddleware(async (auth, req) => {
+
+//  /sign-in 경로가 아니면 -> 비공개
+//  (/sign-in)만은 예외로 공개(public) 처리 -> 로그인 하세요!!  
+
+//   if (!isPublicRoute(req)) {
+//     await auth.protect()
+//   }
+// })
